@@ -17,6 +17,12 @@ I would do this in the following steps:
 I'd do this first and then basically repeat the exercise for growth. The python-level function is [here](https://github.com/LSSTDESC/CCL/blob/b1218ee9a4358c5e692c1407171cb86b13fda586/pyccl/core.py#L641), the C-level function whose functionality you need to reproduce is [here](https://github.com/LSSTDESC/CCL/blob/b1218ee9a4358c5e692c1407171cb86b13fda586/src/ccl_background.c#L631), and the wrapping function that helps pass the numpy arrays should be created [here](https://github.com/LSSTDESC/CCL/blob/master/pyccl/ccl_background.i).
 
 ## Instalment 2
+Here's a proposal:
+1. Create an attribute of the `Cosmology` object called `linear_power_on_input` that defaults to `False`.
+2. Create a method `Cosmology.set_linear_power_from_arrays` that takes three arrays: `a_arr`, `k_arr` and `pk_arr`, with shapes `(n_a)`, `(n_k)` and `(n_a, n_k)` respectively. `pk_arr[i_a, i_k]` should contain the linear matter power spectrum at scale k=`k_arr[i_k]` and at scale factor a=`a_arr[i_a]`. These arrays should be stored as attributes of the `Cosmology` object, and the attribute `linear_power_on_input` should be set to `True` after this method is called. Also, at the beginning of the method, you should check for `self.has_linear_power` (the same way you're checking for `self.has_distances` in `set_background_from_arrays`).
+3. Change the name of the `Cosmology.compute_linear_power` method [here](https://github.com/chrgeorgiou/CCL/blob/7214e78498e67d3816a6b63d98db078fec89993e/pyccl/core.py#L714) into `Cosmology._compute_linear_power_internal`.
+4. Create a method `Cosmology._compute_linear_power_from_arrays()`. This function should create a `Pk2D` object from the arrays stored after calling `set_linear_power_from_arrays`, and then pass them to C by calling `lib.cosmology_compute_linear_power` as done [here](https://github.com/chrgeorgiou/CCL/blob/7214e78498e67d3816a6b63d98db078fec89993e/pyccl/core.py#L756) (note that, in this line, `psp` is the corresponding `Pk2D` object).
+5. Recreate the method `Cosmology.compute_linear_power` that you deleted in step 3. Now, if `linear_power_on_input` is True, then this should call `_compute_linear_power_from_arrays`. Otherwise, it should cal `_compute_linear_power_internal`.
 
 ## Instalment 3
 
