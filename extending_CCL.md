@@ -24,6 +24,14 @@ Here's a proposal:
 4. Create a method `Cosmology._compute_linear_power_from_arrays()`. This function should create a `Pk2D` object from the arrays stored after calling `set_linear_power_from_arrays`, and then pass them to C by calling `lib.cosmology_compute_linear_power` as done [here](https://github.com/chrgeorgiou/CCL/blob/7214e78498e67d3816a6b63d98db078fec89993e/pyccl/core.py#L756) (note that, in this line, `psp` is the corresponding `Pk2D` object).
 5. Recreate the method `Cosmology.compute_linear_power` that you deleted in step 3. Now, if `linear_power_on_input` is True, then this should call `_compute_linear_power_from_arrays`. Otherwise, it should cal `_compute_linear_power_internal`.
 
+Additional steps:
+
+6. Create a new `transfer_function_t` element [here](https://github.com/LSSTDESC/CCL/blob/f6a2fd7feeb382c5f44ab7fa9b8d2b7991c13719/include/ccl_config.h#L22) called `ccl_external_pklin` or something like that.
+7. Make a copy of the function `ccl_compute_nonlin_power_from_f2d` [(this one)](https://github.com/LSSTDESC/CCL/blob/f6a2fd7feeb382c5f44ab7fa9b8d2b7991c13719/src/ccl_power.c#L475) and call it `ccl_compute_linear_power_from_f2d`. Within it, change `p_nl` to `p_lin`.
+8. Add one more case to `ccl_cosmology_compute_linear_power` after the `ccl_boltzmann_camb` case [(here)](https://github.com/LSSTDESC/CCL/blob/f6a2fd7feeb382c5f44ab7fa9b8d2b7991c13719/src/ccl_power.c#L456) for the `ccl_external_pklin` case you created in step 6. Within it, call the `ccl_compute_linear_power_from_f2d` function you created in step 7.
+9. Declare the `ccl_external_pklin` type at the python level [here](https://github.com/LSSTDESC/CCL/blob/f6a2fd7feeb382c5f44ab7fa9b8d2b7991c13719/pyccl/core.py#L21).
+10. When you pass external P(k) arrays [(here)](https://github.com/chrgeorgiou/CCL/blob/001dd5e0fa1d7f6bf9c136f02e536620206f9180/pyccl/core.py#L1011), check that `self._config_init_kwargs['transfer_function'] == 'external_pklin'` (or whatever you've decided to call it), and raise an exception otherwise. This means that users will need to set the `transfer_function` argument to `'external_pklin'` whenever they create a cosmology object if they're gonna provide the power spectrum externally and otherwise things will fail when they do so.
+
 ## Instalment 3
 
 ## Instalment 4
