@@ -1,4 +1,4 @@
-# MCF simulations
+# Marked Pk simulations
 
 The simulations were run with a box of size L_box=700 Mpc/h, with 512^3 particles. Each sim takes only about 5h to run, so it's actually not that bad (although the cluster is only big enough to run 2 of these at a time, so it's not like we can run 100s of these willy-nilly).
 
