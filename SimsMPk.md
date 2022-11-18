@@ -34,3 +34,12 @@ The cosmological parameters of the different sims are as follows
 | h_m       | ""      | ""     | 0.65 | ""   | ""       |
 | n_s_p     | ""      | ""     | ""   | 0.99 | ""       |
 | n_s_m     | ""      | ""     | "    | 0.93 | ""       |
+
+## Simulations for covariances
+
+A suite of 100 COLA simulations for the fiducial cosmology were also run to test covariances. The COLA sims use the same box size and number of particles as the other sims, but were only run for two redshifts (z=0, z=1). The snapshots can be found in
+
+`/mnt/extraspace/damonge/MarkedPk/fiducial_512/COLA/seed<seed>/sn_fiducial_512_seed00<seed>_<snapnum>.<part>`
+
+Where `<seed>` goes from 100 to 199, `<snapnum>` is 000 (z=1) or 001 (z=0), and `<part>` is an integer from 0 to 63 (the snapshots are divided into 64 parts - `nbodykit` should still be able to read them).
+  
